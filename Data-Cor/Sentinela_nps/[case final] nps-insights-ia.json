@@ -1,0 +1,1135 @@
+{
+  "name": "Agente Classificador",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Pesquisa de satisfação",
+        "formDescription": "Formulário de Pesquisa de satisfação da empresa Flexdata",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Informe seu email aqui"
+            },
+            {
+              "fieldLabel": "Nome",
+              "placeholder": "informe seu nome aqui ..."
+            },
+            {
+              "fieldLabel": "De 0 á 5 Quanto você indicaria a empresa para um amigo ?",
+              "fieldType": "radio",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "0"
+                  },
+                  {
+                    "option": "1"
+                  },
+                  {
+                    "option": "2"
+                  },
+                  {
+                    "option": "3"
+                  },
+                  {
+                    "option": "4"
+                  },
+                  {
+                    "option": "5"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Por favor, compartilhe conosco quaisquer comentários/sugestões",
+              "fieldType": "textarea",
+              "placeholder": "Escreva Aqui ..."
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Submit"
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -224,
+        800
+      ],
+      "id": "069a9f83-5b5b-4a0f-9745-fd2bb3be092d",
+      "name": "On form submission",
+      "webhookId": "ba4d187d-bda8-4594-b111-9c56a3d8e939"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c5461c2d-3a09-464c-91f9-80e80758f415",
+              "name": "resposta_likert",
+              "value": "={{ $json[\"De 0 á 5 Quanto você indicaria a empresa para um amigo ?\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "a8307d22-9fb1-4a31-8a16-9f9bbf1bd9ef",
+              "name": "cometario",
+              "value": "={{ $json[\"Por favor, compartilhe conosco quaisquer comentários/sugestões\"] }}",
+              "type": "string"
+            },
+            {
+              "id": "dd91cc2f-2f15-426c-8e3b-74e0a44bfeac",
+              "name": "Data",
+              "value": "=  {{ $json.submittedAt }}",
+              "type": "string"
+            },
+            {
+              "id": "2731e232-9489-45cb-add1-7bc38cf2b35c",
+              "name": "Email",
+              "value": "={{ $json.Email }}",
+              "type": "string"
+            },
+            {
+              "id": "89343d40-1759-45ac-9392-1d38d16cc3c1",
+              "name": "Nome",
+              "value": "={{ $json.Nome }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        0,
+        800
+      ],
+      "id": "3bc8859b-1b26-4b68-9ee8-4fc78462b735",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "# Loop over input items and add a new field called 'my_new_field' to the JSON of each one\nfor item in _items:\n  item[\"json\"]['resposta_likert'] = int(item[\"json\"]['resposta_likert'])\n\nreturn _items"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        800
+      ],
+      "id": "069c0484-3d0d-4312-93b6-327fd60f84c8",
+      "name": "Converter Dados"
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "dados = _items[0]['json']\n\nmatch dados['resposta_likert']:\n    case 0 | 1 | 2:\n        dados['classificacao'] = 'Detrator'\n    case 3:\n        dados['classificacao'] = 'Neutro'\n    case 4 | 5:\n        dados['classificacao'] = 'Promotor'\n\nreturn dados\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        800
+      ],
+      "id": "aaa0f2c0-acbe-4685-b4f5-ead45e25efe6",
+      "name": "Classificação",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.Data }}",
+        "format": "custom",
+        "customFormat": "dd/M/yyyy",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        672,
+        800
+      ],
+      "id": "b371565c-8285-4ab5-afd4-c05fcbd7d4d8",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        1392
+      ],
+      "id": "b69ae0a4-0f5d-404a-aa18-886d64e91aaf",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "suXjHH3fBAXaKpU1",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        64,
+        1392
+      ],
+      "id": "78ebf4f8-0072-4e0c-97b3-a7dc41a0ed54",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "suXjHH3fBAXaKpU1",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"sentimento\": \"Negativo\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        1392
+      ],
+      "id": "97463e0f-1721-4f95-8d55-677598636d68",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        416,
+        1392
+      ],
+      "id": "c14c896e-832c-4d55-9823-5e7d2d0e26fa",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "suXjHH3fBAXaKpU1",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"Categoria\": \"Atendimento / Suporte\",\n  \"Subcategoria\": \"Tempo de resposta\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        576,
+        1392
+      ],
+      "id": "4766aa78-4869-4ff6-aa62-ea0648770ed6",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um agente de análise de sentimento.\nSua tarefa é analisar o comentário do cliente e classificar o sentimento geral como Positivo, Negativo ou Neutro.\n\nRegras:\n\nConsidere o tom geral e as palavras usadas pelo cliente.\n\nNão adicione explicações, probabilidades ou justificativas.\n\nResponda apenas com uma das três opções:\nPositivo, Negativo ou Neutro.\n\nComentário a ser analisado:\n{{ $('Corretor').item.json.output }}\n{{ $('Classificação').item.json.cometario }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        64,
+        1168
+      ],
+      "id": "36a324fb-c411-4017-887b-46a23ae27d0e",
+      "name": "Sentimento"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Você é um agente especializado em classificar comentários de clientes de uma empresa de tecnologia e análise de dados.\nSua tarefa é identificar a categoria e subcategoria mais apropriadas para o comentário abaixo.\n\nRegras:\n\nBaseie-se apenas no conteúdo do comentário.\n\nRetorne somente os campos “Categoria” e “Subcategoria”.\n\nNão adicione justificativas, explicações ou textos extras.\n\nCaso o comentário não se encaixe em nenhuma categoria clara, classifique como:\nCategoria: “Outros”\nSubcategoria: “Não especificado”\n\nCategorias e subcategorias disponíveis:\n\n1. Produto / Solução\n\nQualidade dos dados\n\nFuncionalidades\n\nEstabilidade / Bugs\n\nInterface / Usabilidade\n\nInovação\n\n2. Atendimento / Suporte\n\nTempo de resposta\n\nCordialidade\n\nResolução de problemas\n\nComunicação\n\n3. Entrega / Projeto\n\nPrazos\n\nEscopo\n\nDocumentação\n\nAlinhamento técnico\n\n4. Preço / Contrato\n\nCusto-benefício\n\nPreço alto\n\nTermos contratuais\n\nRenovação\n\n5. Equipe / Parceria\n\nColaboração\n\nProfissionalismo\n\nConhecimento técnico\n\nDisponibilidade\n\n6. Plataforma / Integrações\n\nDashboard\n\nPerformance\n\nAPI / Conectores\n\nCompatibilidade\n\n7. Outros\n\nSugestões gerais\n\nSem relação direta com o serviço\n\nComentário a ser analisado:\n{{ $json.output }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        416,
+        1168
+      ],
+      "id": "eb96f571-4509-42cc-843d-2a101987698b",
+      "name": "Categorias"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Co base na mesngaem abaixo trate os erros de portugês e acentuação.\nTexto para tratar:\n{{ $('Classificação').item.json.cometario }}'",
+        "options": {
+          "systemMessage": "Você é um agente especializado no tratamento e padronização de textos de pesquisas de satisfação de clientes.\nSua tarefa é corrigir abreviações, erros ortográficos e variações de escrita, mantendo o significado original e o tom do comentário.\n\n🧩 Regras:\n\nPreserve o sentido original e a intenção do cliente.\n\nCorrija apenas o que for necessário para melhorar a clareza e a ortografia.\n\nNão adicione, remova ou interprete informações que não estejam explícitas no texto.\n\nMantenha o estilo informal se o comentário for escrito dessa forma.\n\nRetorne somente no formato JSON indicado abaixo, sem explicações adicionais.\n\nFormato de saída (obrigatório):\napenas o comentrario tratado sem nenhuma mesnção ou comentario da ia nem nenhuma inicialização de resposta, apenas o comentario tratado de forma objetiva\n\n\nResponda apenas o texto formatado nada alem disso."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -288,
+        1168
+      ],
+      "id": "df9f2bc8-2bca-4b68-b098-24607b8bb0b7",
+      "name": "Corretor"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        768,
+        1392
+      ],
+      "id": "1776bbba-3dda-416c-9872-eb3598d237b3",
+      "name": "Groq Chat Model3",
+      "credentials": {
+        "groqApi": {
+          "id": "suXjHH3fBAXaKpU1",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Com base n o comentário abaixo analise e e retorne o motivador desse cometario:\n\n{{ $json.output }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Você é um agente especialista em análise de satisfação do cliente para uma empresa de tecnologia e análise de dados.\nSua tarefa é identificar o principal driver (motivador) que influenciou o sentimento do cliente no comentário abaixo.\n\nO driver é o motivo central da percepção positiva ou negativa do cliente.\n\n🧩 Regras:\n\nAnalise o contexto do comentário e identifique apenas um driver principal.\n\nNão adicione explicações, probabilidades ou justificativas.\n\nSe o comentário não permitir inferir o motivo, use:\n\"Indefinido\"\n\nO valor de \"output\" deve ser exatamente um dos drivers disponíveis abaixo.\n\n⚙️ Drivers disponíveis:\n\nQualidade dos dados → Precisão, confiabilidade ou atualização dos dados entregues.\n\nFacilidade de uso → Navegação, interface, experiência do usuário.\n\nSuporte técnico → Atendimento, tempo de resposta, resolução de chamados.\n\nPrazo de entrega → Atrasos, pontualidade, cumprimento de cronogramas.\n\nCusto-benefício → Preço justo, retorno do investimento.\n\nPerformance da plataforma → Velocidade, estabilidade, bugs.\n\nComunicação / Relacionamento → Clareza, alinhamento, contato com o time.\n\nInovação / Tecnologia → Recursos novos, diferenciais técnicos.\n\nDocumentação / Treinamento → Materiais de apoio, onboarding, clareza nas instruções.\n\nValor percebido → Impacto positivo no negócio, resultados entregues.\n\nIndefinido → Quando não há informações suficientes.\n\n\n\nresponda estritamente apenas o modivador mais nada, exemplo, remova os caracteres especiais como \"\\\" & \"|\"\n\n\"Performance da plataforma\"\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        768,
+        1168
+      ],
+      "id": "77f5619a-9f67-4fb8-a120-1794ecd7c91d",
+      "name": "Motivadores"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fb8ad43f-322c-424e-97f7-87db876fa37d",
+              "name": "sentimentos",
+              "value": "={{ $('Sentimento').all()[0].json.output.values()[0]}}",
+              "type": "string"
+            },
+            {
+              "id": "0c3505da-ea38-45b2-ad9a-d91890f55553",
+              "name": "categoria",
+              "value": "={{ $('Categorias').all()[0].json.output.Categoria }}",
+              "type": "string"
+            },
+            {
+              "id": "efa212b0-d125-4e71-813e-8362a07d0f8a",
+              "name": "subCategoria",
+              "value": "={{ $('Categorias').all()[0].json.output.Subcategoria }}",
+              "type": "string"
+            },
+            {
+              "id": "ef049b2c-4d98-43d9-90b9-1ff20227d440",
+              "name": "motivadores",
+              "value": "={{ $('Motivadores').all()[0].json.output}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -384,
+        1872
+      ],
+      "id": "4f1245d6-839e-4e3d-a0c4-155a5802cb55",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Classificação').item.json.classificacao }}",
+                    "rightValue": "Detrator",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "1372f50e-04e9-4caf-8d1f-db693bde9e02"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Detrator"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e013d28a-1e4a-4de9-bcb0-fee0b1ab5f00",
+                    "leftValue": "={{ $('Classificação').item.json.classificacao }}",
+                    "rightValue": "Promotor",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Promotor"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8ed55eab-a069-4c23-9f2a-24e1e5eceec9",
+                    "leftValue": "={{ $('Classificação').item.json.classificacao }}",
+                    "rightValue": "Neutro",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Neutro"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        64,
+        1856
+      ],
+      "id": "749c24ce-8d03-468d-b436-88d67ad3f8a6",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76eca91d-5b99-4c13-955e-b9fa5639c359",
+              "name": "ContentEmail",
+              "value": "=<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Alerta NPS (Detrator) — {{ $('Edit Fields').item.json.Nome }}</title>\n  <style>\n    body {\n      margin: 0;\n      padding: 0;\n      font-family: 'Segoe UI', Roboto, Arial, sans-serif;\n      background: #f3f6fa;\n      color: #212529;\n      -webkit-font-smoothing: antialiased;\n    }\n\n    .email-container {\n      max-width: 640px;\n      margin: 20px auto;\n      background: #fff;\n      border-radius: 12px;\n      box-shadow: 0 8px 24px rgba(0,0,0,0.08);\n      overflow: hidden;\n    }\n\n    .header {\n      /* Cor do header para Detrator */\n      background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);\n      padding: 35px 28px;\n      text-align: center;\n      color: #fff;\n      position: relative;\n    }\n\n    .header .icon {\n      font-size: 48px;\n      margin-bottom: 10px;\n      line-height: 1;\n    }\n\n    .header h1 {\n      font-size: 26px;\n      margin: 0;\n      font-weight: 700;\n      line-height: 1.2;\n    }\n\n    .header p {\n      margin: 8px 0 0;\n      font-size: 16px;\n      opacity: 0.95;\n    }\n\n    .status-badge {\n      display: inline-block;\n      margin-top: 20px;\n      padding: 8px 22px;\n      border-radius: 25px;\n      font-weight: 700;\n      font-size: 14px;\n      letter-spacing: 0.5px;\n      text-transform: uppercase;\n      background: rgba(255, 255, 255, 0.2); /* Fundo branco semi-transparente */\n      color: #fff;\n    }\n\n    /* Cores dinâmicas por classificação */\n    /* Detrator */\n    .detrator-bg { background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); }\n    .detrator-comment-border { border-left: 4px solid #dc3545; }\n    .detrator-alert-bg { background: #fdf5f5; border: 1px solid #f5c6cb; }\n    .detrator-alert-color { color: #721c24; }\n    .detrator-comment-title-color { color: #dc3545; }\n\n    /* Neutro */\n    .neutro-bg { background: linear-gradient(135deg, #ffc107 0%, #ffeb95 100%); }\n    .neutro-comment-border { border-left: 4px solid #ffc107; }\n    .neutro-alert-bg { background: #fffde6; border: 1px solid #ffeeba; }\n    .neutro-alert-color { color: #856404; }\n    .neutro-comment-title-color { color: #ffc107; }\n\n    /* Promotor */\n    .promotor-bg { background: linear-gradient(135deg, #28a745 0%, #2edb56 100%); }\n    .promotor-comment-border { border-left: 4px solid #28a745; }\n    .promotor-alert-bg { background: #eafbee; border: 1px solid #c3e6cb; }\n    .promotor-alert-color { color: #155724; }\n    .promotor-comment-title-color { color: #28a745; }\n\n    .content {\n      padding: 30px;\n    }\n\n    .info-section {\n      background: #f8f9fa;\n      border-radius: 10px;\n      padding: 20px;\n      margin-bottom: 25px;\n    }\n\n    .info-row {\n      display: flex;\n      justify-content: space-between;\n      padding: 12px 0;\n      border-bottom: 1px solid #e9ecef;\n    }\n\n    .info-row:last-child {\n      border-bottom: none;\n    }\n\n    .info-label {\n      font-size: 14px;\n      font-weight: 600;\n      color: #6c757d;\n      text-transform: uppercase;\n      letter-spacing: 0.5px;\n    }\n\n    .info-value {\n      font-size: 16px;\n      font-weight: 600;\n      color: #212529;\n    }\n\n    .comment-section {\n      background: #ffffff;\n      border-radius: 8px;\n      padding: 20px 24px;\n      margin-bottom: 25px;\n      box-shadow: 0 2px 10px rgba(0,0,0,0.03);\n    }\n\n    .comment-title {\n      font-size: 15px;\n      font-weight: 700;\n      text-transform: uppercase;\n      margin-bottom: 12px;\n      letter-spacing: 0.5px;\n    }\n\n    .comment-text {\n      font-size: 17px;\n      color: #343a40;\n      line-height: 1.7;\n      font-style: italic;\n    }\n\n    .alert-section {\n      text-align: center;\n      padding: 30px;\n      border-radius: 10px;\n      margin-bottom: 25px;\n      font-weight: 600;\n    }\n\n    .alert-section .alert-icon {\n      font-size: 40px;\n      margin-bottom: 10px;\n      line-height: 1;\n    }\n\n    .alert-section strong {\n      display: block;\n      font-size: 17px;\n      margin-top: 10px;\n    }\n\n    .alert-section p {\n      margin-top: 8px;\n      font-size: 14px;\n      opacity: 0.9;\n    }\n\n    .footer {\n      background: #f8f9fa;\n      text-align: center;\n      padding: 20px 24px;\n      font-size: 13px;\n      color: #6c757d;\n      border-top: 1px solid #e9ecef;\n    }\n\n    @media (max-width: 600px) {\n      .content { padding: 20px; }\n      .info-row { flex-direction: column; align-items: flex-start; }\n      .info-value { text-align: left; margin-top: 4px; }\n      .header { padding: 30px 20px; }\n      .header h1 { font-size: 24px; }\n      .alert-section { padding: 25px; }\n    }\n  </style>\n</head>\n\n<body>\n  <div class=\"email-container\">\n    <header class=\"header detrator-bg\">\n      <div class=\"icon\">🚨</div>\n      <h1>Alerta: Feedback NPS Detrator!</h1>\n      <p>Um cliente expressou insatisfação e isso requer sua atenção imediata.</p>\n      <div class=\"status-badge\">\n        Detrator\n      </div>\n    </header>\n\n    <main class=\"content\">\n      <div class=\"info-section\">\n        <div class=\"info-row\">\n          <span class=\"info-label\">Cliente</span>\n          <span class=\"info-value\"> : {{ $('Edit Fields').item.json.Nome }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">E-mail</span>\n          <span class=\"info-value\">  : {{ $('Edit Fields').item.json.Email }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Data da Resposta</span>\n          <span class=\"info-value\"> :  {{ $('Date & Time').item.json.formattedDate }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Sentimento</span>\n          <span class=\"info-value\"> :  {{ $('Sentimento').item.json.output.sentimento }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Categoria</span>\n          <span class=\"info-value\"> :  {{ $('Categorias').item.json.output.Categoria }} › {{ $('Categorias').item.json.output.Subcategoria }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Motivador</span>\n          <span class=\"info-value\"> :  {{ $('Motivadores').item.json.output }}</span>\n        </div>\n      </div>\n\n      <div class=\"comment-section detrator-comment-border\">\n        <div class=\"comment-title detrator-comment-title-color\">💬 Comentário do Cliente</div>\n        <p class=\"comment-text\">\n          {{ $('Corretor').item.json.output }}\n        </p>\n      </div>\n\n      <div class=\"alert-section detrator-alert-bg detrator-alert-color\">\n        <div class=\"alert-icon\">⚠️</div>\n        <strong>Aja rápido! Analise este feedback detrator e planeje uma ação.</strong>\n      </div>\n    </main>\n\n    <footer class=\"footer\">\n      <p>Este é um e-mail automático do sistema de NPS interno.<br>\n      Enviado em {{ $('Date & Time').item.json.formattedDate }}.</p>\n    </footer>\n  </div>\n</body>\n</html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        1584
+      ],
+      "id": "407f30dc-d6ae-426b-af9c-4921d1be29a9",
+      "name": "ContentEmail (Detrator)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7504a489-4ffa-4542-880d-1e4f5c449b15",
+              "name": "ContentEmail",
+              "value": "=<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Nova Resposta NPS (Promotor) — {{ $('Edit Fields').item.json.Nome }}</title>\n  <style>\n    body {\n      margin: 0;\n      padding: 0;\n      font-family: 'Segoe UI', Roboto, Arial, sans-serif;\n      background: #f3f6fa;\n      color: #212529;\n      -webkit-font-smoothing: antialiased;\n    }\n\n    .email-container {\n      max-width: 640px;\n      margin: 20px auto;\n      background: #fff;\n      border-radius: 12px;\n      box-shadow: 0 8px 24px rgba(0,0,0,0.08);\n      overflow: hidden;\n    }\n\n    .header {\n      /* Cor do header para Promotor */\n      background: linear-gradient(135deg, #28a745 0%, #2edb56 100%);\n      padding: 35px 28px;\n      text-align: center;\n      color: #fff;\n      position: relative;\n    }\n\n    .header .icon {\n      font-size: 48px;\n      margin-bottom: 10px;\n      line-height: 1;\n    }\n\n    .header h1 {\n      font-size: 26px;\n      margin: 0;\n      font-weight: 700;\n      line-height: 1.2;\n    }\n\n    .header p {\n      margin: 8px 0 0;\n      font-size: 16px;\n      opacity: 0.95;\n    }\n\n    .status-badge {\n      display: inline-block;\n      margin-top: 20px;\n      padding: 8px 22px;\n      border-radius: 25px;\n      font-weight: 700;\n      font-size: 14px;\n      letter-spacing: 0.5px;\n      text-transform: uppercase;\n      background: rgba(255, 255, 255, 0.2); /* Fundo branco semi-transparente */\n      color: #fff;\n    }\n\n    /* Cores dinâmicas por classificação */\n    /* Detrator */\n    .detrator-bg { background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); }\n    .detrator-comment-border { border-left: 4px solid #dc3545; }\n    .detrator-alert-bg { background: #fdf5f5; border: 1px solid #f5c6cb; }\n    .detrator-alert-color { color: #721c24; }\n    .detrator-comment-title-color { color: #dc3545; }\n\n    /* Neutro */\n    .neutro-bg { background: linear-gradient(135deg, #ffc107 0%, #ffeb95 100%); }\n    .neutro-comment-border { border-left: 4px solid #ffc107; }\n    .neutro-alert-bg { background: #fffde6; border: 1px solid #ffeeba; }\n    .neutro-alert-color { color: #856404; }\n    .neutro-comment-title-color { color: #ffc107; }\n\n    /* Promotor */\n    .promotor-bg { background: linear-gradient(135deg, #28a745 0%, #2edb56 100%); }\n    .promotor-comment-border { border-left: 4px solid #28a745; }\n    .promotor-alert-bg { background: #eafbee; border: 1px solid #c3e6cb; }\n    .promotor-alert-color { color: #155724; }\n    .promotor-comment-title-color { color: #28a745; }\n\n    .content {\n      padding: 30px;\n    }\n\n    .info-section {\n      background: #f8f9fa;\n      border-radius: 10px;\n      padding: 20px;\n      margin-bottom: 25px;\n    }\n\n    .info-row {\n      display: flex;\n      justify-content: space-between;\n      padding: 12px 0;\n      border-bottom: 1px solid #e9ecef;\n    }\n\n    .info-row:last-child {\n      border-bottom: none;\n    }\n\n    .info-label {\n      font-size: 14px;\n      font-weight: 600;\n      color: #6c757d;\n      text-transform: uppercase;\n      letter-spacing: 0.5px;\n    }\n\n    .info-value {\n      font-size: 16px;\n      font-weight: 600;\n      color: #212529;\n    }\n\n    .comment-section {\n      background: #ffffff;\n      border-radius: 8px;\n      padding: 20px 24px;\n      margin-bottom: 25px;\n      box-shadow: 0 2px 10px rgba(0,0,0,0.03);\n    }\n\n    .comment-title {\n      font-size: 15px;\n      font-weight: 700;\n      text-transform: uppercase;\n      margin-bottom: 12px;\n      letter-spacing: 0.5px;\n    }\n\n    .comment-text {\n      font-size: 17px;\n      color: #343a40;\n      line-height: 1.7;\n      font-style: italic;\n    }\n\n    .alert-section {\n      text-align: center;\n      padding: 30px;\n      border-radius: 10px;\n      margin-bottom: 25px;\n      font-weight: 600;\n    }\n\n    .alert-section .alert-icon {\n      font-size: 40px;\n      margin-bottom: 10px;\n      line-height: 1;\n    }\n\n    .alert-section strong {\n      display: block;\n      font-size: 17px;\n      margin-top: 10px;\n    }\n\n    .alert-section p {\n      margin-top: 8px;\n      font-size: 14px;\n      opacity: 0.9;\n    }\n\n    .footer {\n      background: #f8f9fa;\n      text-align: center;\n      padding: 20px 24px;\n      font-size: 13px;\n      color: #6c757d;\n      border-top: 1px solid #e9ecef;\n    }\n\n    @media (max-width: 600px) {\n      .content { padding: 20px; }\n      .info-row { flex-direction: column; align-items: flex-start; }\n      .info-value { text-align: left; margin-top: 4px; }\n      .header { padding: 30px 20px; }\n      .header h1 { font-size: 24px; }\n      .alert-section { padding: 25px; }\n    }\n  </style>\n</head>\n\n<body>\n  <div class=\"email-container\">\n    <header class=\"header promotor-bg\">\n      <div class=\"icon\">🎉</div>\n      <h1>Excelente: Feedback NPS Promotor!</h1>\n      <p>Um cliente satisfeito compartilhou um feedback positivo. Ótima notícia!</p>\n      <div class=\"status-badge\">\n        Promotor\n      </div>\n    </header>\n\n    <main class=\"content\">\n      <div class=\"info-section\">\n        <div class=\"info-row\">\n          <span class=\"info-label\">Cliente</span>\n          <span class=\"info-value\"> : {{ $('Edit Fields').item.json.Nome }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">E-mail</span>\n          <span class=\"info-value\"> : {{ $('Edit Fields').item.json.Email }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Data da Resposta</span>\n          <span class=\"info-value\"> :  {{ $('Date & Time').item.json.formattedDate }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Sentimento</span>\n          <span class=\"info-value\"> :  {{ $('Sentimento').item.json.output.sentimento }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Categoria</span>\n          <span class=\"info-value\"> :  {{ $('Categorias').item.json.output.Categoria }} › {{ $('Categorias').item.json.output.Subcategoria }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Motivador</span>\n          <span class=\"info-value\"> :  {{ $('Motivadores').item.json.output }}</span>\n        </div>\n      </div>\n\n      <div class=\"comment-section promotor-comment-border\">\n        <div class=\"comment-title promotor-comment-title-color\">💬 Comentário do Cliente</div>\n        <p class=\"comment-text\">\n           {{ $('Corretor').item.json.output }}\n        </p>\n      </div>\n\n      <div class=\"alert-section promotor-alert-bg promotor-alert-color\">\n        <div class=\"alert-icon\">⭐</div>\n        <strong>Celebre e entenda o que está dando certo com este feedback!</strong>\n      </div>\n    </main>\n\n    <footer class=\"footer\">\n      <p>Este é um e-mail automático do sistema de NPS interno.<br>\n      Enviado em {{ $('Date & Time').item.json.formattedDate }}.</p>\n    </footer>\n  </div>\n</body>\n</html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        1872
+      ],
+      "id": "e6030394-8328-4d9b-a2f4-448cf082f6b5",
+      "name": "ContentEmail (Promotor)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7a157216-6b7e-4ba3-a2ae-143ce755efa5",
+              "name": "ContentEmail",
+              "value": "=<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Nova Resposta NPS (Neutro) — {{ $('Edit Fields').item.json.Nome }}</title>\n  <style>\n    body {\n      margin: 0;\n      padding: 0;\n      font-family: 'Segoe UI', Roboto, Arial, sans-serif;\n      background: #f3f6fa;\n      color: #212529;\n      -webkit-font-smoothing: antialiased;\n    }\n\n    .email-container {\n      max-width: 640px;\n      margin: 20px auto;\n      background: #fff;\n      border-radius: 12px;\n      box-shadow: 0 8px 24px rgba(0,0,0,0.08);\n      overflow: hidden;\n    }\n\n    .header {\n      /* Cor do header para Neutro */\n      background: linear-gradient(135deg, #ffc107 0%, #ffeb95 100%);\n      padding: 35px 28px;\n      text-align: center;\n      color: #fff;\n      position: relative;\n    }\n\n    .header .icon {\n      font-size: 48px;\n      margin-bottom: 10px;\n      line-height: 1;\n    }\n\n    .header h1 {\n      font-size: 26px;\n      margin: 0;\n      font-weight: 700;\n      line-height: 1.2;\n    }\n\n    .header p {\n      margin: 8px 0 0;\n      font-size: 16px;\n      opacity: 0.95;\n    }\n\n    .status-badge {\n      display: inline-block;\n      margin-top: 20px;\n      padding: 8px 22px;\n      border-radius: 25px;\n      font-weight: 700;\n      font-size: 14px;\n      letter-spacing: 0.5px;\n      text-transform: uppercase;\n      background: rgba(255, 255, 255, 0.2); /* Fundo branco semi-transparente */\n      color: #fff;\n    }\n\n    /* Cores dinâmicas por classificação */\n    /* Detrator */\n    .detrator-bg { background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); }\n    .detrator-comment-border { border-left: 4px solid #dc3545; }\n    .detrator-alert-bg { background: #fdf5f5; border: 1px solid #f5c6cb; }\n    .detrator-alert-color { color: #721c24; }\n    .detrator-comment-title-color { color: #dc3545; }\n\n    /* Neutro */\n    .neutro-bg { background: linear-gradient(135deg, #ffc107 0%, #ffeb95 100%); }\n    .neutro-comment-border { border-left: 4px solid #ffc107; }\n    .neutro-alert-bg { background: #fffde6; border: 1px solid #ffeeba; }\n    .neutro-alert-color { color: #856404; }\n    .neutro-comment-title-color { color: #ffc107; }\n\n    /* Promotor */\n    .promotor-bg { background: linear-gradient(135deg, #28a745 0%, #2edb56 100%); }\n    .promotor-comment-border { border-left: 4px solid #28a745; }\n    .promotor-alert-bg { background: #eafbee; border: 1px solid #c3e6cb; }\n    .promotor-alert-color { color: #155724; }\n    .promotor-comment-title-color { color: #28a745; }\n\n    .content {\n      padding: 30px;\n    }\n\n    .info-section {\n      background: #f8f9fa;\n      border-radius: 10px;\n      padding: 20px;\n      margin-bottom: 25px;\n    }\n\n    .info-row {\n      display: flex;\n      justify-content: space-between;\n      padding: 12px 0;\n      border-bottom: 1px solid #e9ecef;\n    }\n\n    .info-row:last-child {\n      border-bottom: none;\n    }\n\n    .info-label {\n      font-size: 14px;\n      font-weight: 600;\n      color: #6c757d;\n      text-transform: uppercase;\n      letter-spacing: 0.5px;\n    }\n\n    .info-value {\n      font-size: 16px;\n      font-weight: 600;\n      color: #212529;\n    }\n\n    .comment-section {\n      background: #ffffff;\n      border-radius: 8px;\n      padding: 20px 24px;\n      margin-bottom: 25px;\n      box-shadow: 0 2px 10px rgba(0,0,0,0.03);\n    }\n\n    .comment-title {\n      font-size: 15px;\n      font-weight: 700;\n      text-transform: uppercase;\n      margin-bottom: 12px;\n      letter-spacing: 0.5px;\n    }\n\n    .comment-text {\n      font-size: 17px;\n      color: #343a40;\n      line-height: 1.7;\n      font-style: italic;\n    }\n\n    .alert-section {\n      text-align: center;\n      padding: 30px;\n      border-radius: 10px;\n      margin-bottom: 25px;\n      font-weight: 600;\n    }\n\n    .alert-section .alert-icon {\n      font-size: 40px;\n      margin-bottom: 10px;\n      line-height: 1;\n    }\n\n    .alert-section strong {\n      display: block;\n      font-size: 17px;\n      margin-top: 10px;\n    }\n\n    .alert-section p {\n      margin-top: 8px;\n      font-size: 14px;\n      opacity: 0.9;\n    }\n\n    .footer {\n      background: #f8f9fa;\n      text-align: center;\n      padding: 20px 24px;\n      font-size: 13px;\n      color: #6c757d;\n      border-top: 1px solid #e9ecef;\n    }\n\n    @media (max-width: 600px) {\n      .content { padding: 20px; }\n      .info-row { flex-direction: column; align-items: flex-start; }\n      .info-value { text-align: left; margin-top: 4px; }\n      .header { padding: 30px 20px; }\n      .header h1 { font-size: 24px; }\n      .alert-section { padding: 25px; }\n    }\n  </style>\n</head>\n\n<body>\n  <div class=\"email-container\">\n    <header class=\"header neutro-bg\">\n      <div class=\"icon\">📊</div>\n      <h1>Feedback NPS Neutro Recebido!</h1>\n      <p>Um novo feedback foi registrado. Há oportunidades de melhoria!</p>\n      <div class=\"status-badge\">\n        Neutro\n      </div>\n    </header>\n\n    <main class=\"content\">\n      <div class=\"info-section\">\n        <div class=\"info-row\">\n          <span class=\"info-label\">Cliente</span>\n          <span class=\"info-value\"> : {{ $('Edit Fields').item.json.Nome }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">E-mail</span>\n          <span class=\"info-value\"> : {{ $('Edit Fields').item.json.Email }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Data da Resposta</span>\n          <span class=\"info-value\"> : {{ $('Date & Time').item.json.formattedDate }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Sentimento</span>\n          <span class=\"info-value\"> : {{ $('Sentimento').item.json.output.sentimento }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Categoria</span>\n          <span class=\"info-value\"> : {{ $('Categorias').item.json.output.Categoria }} › {{ $('Categorias').item.json.output.Subcategoria }}</span>\n        </div>\n        <div class=\"info-row\">\n          <span class=\"info-label\">Motivador</span>\n          <span class=\"info-value\"> : {{ $('Motivadores').item.json.output }}</span>\n        </div>\n      </div>\n\n      <div class=\"comment-section neutro-comment-border\">\n        <div class=\"comment-title neutro-comment-title-color\">💬 Comentário do Cliente</div>\n        <p class=\"comment-text\">\n          {{ $('Corretor').item.json.output }}\n        </p>\n      </div>\n\n      <div class=\"alert-section neutro-alert-bg neutro-alert-color\">\n        <div class=\"alert-icon\">💡</div>\n        <strong>Analise este feedback para identificar pontos de melhoria.</strong>\n      </div>\n    </main>\n\n    <footer class=\"footer\">\n      <p>Este é um e-mail automático do sistema de NPS interno.<br>\n      Enviado em {{ $('Date & Time').item.json.formattedDate }}.</p>\n    </footer>\n  </div>\n</body>\n</html>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        2064
+      ],
+      "id": "a4e4fe1d-15ba-4be4-b922-6ded6ca1a5a4",
+      "name": "ContentEmail (Neutro)"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        1584
+      ],
+      "id": "d18b78c8-5822-4415-9d66-61ca88b9cc17",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        832,
+        1824
+      ],
+      "id": "4c24bf9a-aa2c-4b60-b3d9-d955fd75e922",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "content": "## ⚙️ Coleta e Tratamento dos Dados\n\n**Estabelecendo a base para a análise de IA**\n\n* **Recebimento via Formulário Web:** \nCaptura os dados brutos do cliente (Nome, Email, Nota, Comentário).\n* **Limpeza de Variáveis:** \nRenomeia os campos do formulário para um formato de fácil acesso.\n* **Conversão de Tipos (Python):** \nGarante que a nota (que chega como texto) seja convertida para um número (inteiro).\n* **Classificação de NPS (Python):** \nAplica a regra de negócio principal, convertendo a nota (0-5) na sua respectiva classificação (Detrator, Neutro ou Promotor).\n* **Formatação de Data:** \nPadroniza a data de envio para um formato legível (ex: dd/M/yyyy).",
+        "height": 336,
+        "width": 2512,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1072,
+        704
+      ],
+      "typeVersion": 1,
+      "id": "f13e8ded-2402-4565-87e8-8e2c795a6309",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 Enriquecimento com Multiagentes de IA\n\n**Corretor e normalizador da mensagem**\n\n**Inteligência para análise de comentários**\n* **Classifica o Sentimento do comentário**\n* **Classifica a Categoria e Subcategoria**\n* **Classifica os Motivadores**\n* **Classifica os Detratores, Promotores e Neutros**",
+        "height": 480,
+        "width": 2512,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1072,
+        1056
+      ],
+      "typeVersion": 1,
+      "id": "19cd00d2-3549-404f-842f-a5dfa5249c0d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## 🚀 Resumo das Funcionalidades do Workflow\n\n* **Armazenamento:** \nSalva os dados do formulário e os resultados da análise de IA\n em uma planilha do Google Sheets.\n\n* **Decisão Lógica:** \nUtiliza um nó \"Switch\" para tomar uma decisão e criar \num caminho diferente com base na classificação da resposta \n(Detrator, Promotor ou Neutro).\n\n* **Notificação Interna:** \nPrepara e envia um e-mail (em formato HTML personalizado) \npara a equipe responsável, contendo todas as informações \ncoletadas e analisadas.formações coletadas e analisadas.",
+        "height": 800,
+        "width": 2512,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1072,
+        1552
+      ],
+      "typeVersion": 1,
+      "id": "30e54146-30c8-4d84-a064-8394dbf760a1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 🚨 Bloco de Ação (Detrator)\n\n* **Abertura de Chamado:** \nAdiciona um card automaticamente no Trello para a equipe \nresponsável atuar no feedback (similar a um chamado de suporte).\n\n* **Contato com Cliente:** Envia um e-mail de desculpas\n diretamente para o cliente, confirmando o recebimento do feedback.",
+        "height": 224,
+        "width": 1856,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -416,
+        1568
+      ],
+      "typeVersion": 1,
+      "id": "83693104-bfca-4b69-be75-b6e6fffa282d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $('Edit Fields').item.json.Email }}",
+        "subject": "=Ouvimos você ({{ $('Edit Fields').item.json.Nome }}) : Uma mensagem sobre sua experiência conosco",
+        "bodyContent": "=<!doctype html>\n<html lang=\"pt-BR\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Ouvimos você</title>\n  <style>\n    body {\n      margin: 0;\n      padding: 0;\n      font-family: 'Segoe UI', Roboto, Arial, sans-serif;\n      background: #f4f7f6;\n      color: #333;\n      -webkit-font-smoothing: antialiased;\n    }\n\n    .email-container {\n      max-width: 600px;\n      margin: 20px auto;\n      background: #ffffff;\n      border-radius: 12px;\n      box-shadow: 0 6px 20px rgba(0,0,0,0.05);\n      overflow: hidden;\n    }\n\n    .header {\n      padding: 30px;\n      text-align: center;\n      /* GRADIENTE para DETRATOR */\n      background: linear-gradient(135deg, #c92a2a 0%, #ff5c5c 100%);\n      color: #ffffff; /* Texto branco para contraste no gradiente */\n      border-bottom: none; /* Remove a borda inferior, já que o gradiente já delimita */\n    }\n\n    .header h2 {\n      margin: 0;\n      font-size: 28px;\n      font-weight: 700;\n      line-height: 1.2;\n    }\n\n    .header p.tagline {\n      font-size: 16px;\n      margin-top: 10px;\n      opacity: 0.9;\n    }\n\n    .content {\n      padding: 35px 40px;\n    }\n\n    .content h1 {\n      font-size: 24px;\n      font-weight: 700;\n      color: #c92a2a; /* Cor de alerta/foco */\n      margin-top: 0;\n    }\n\n    .content p {\n      font-size: 16px;\n      line-height: 1.7;\n      color: #495057;\n      margin-bottom: 25px;\n    }\n\n    .content .emphasis {\n      font-size: 17px;\n      font-weight: 600;\n      color: #212529;\n    }\n\n    .action-box {\n      background: #fdf5f5; /* Fundo vermelho bem claro */\n      border: 1px solid #f5c6cb;\n      border-radius: 8px;\n      padding: 20px;\n      text-align: center;\n    }\n\n    .action-box p {\n      margin: 0;\n      font-size: 15px;\n      color: #721c24; /* Cor de texto escura do alerta */\n      font-weight: 500;\n    }\n\n    .footer {\n      background: #f8f9fa;\n      text-align: center;\n      padding: 25px;\n      font-size: 13px;\n      color: #868e96;\n      border-top: 1px solid #e9ecef;\n    }\n\n    @media (max-width: 600px) {\n      .content { padding: 30px 25px; }\n      .content h1 { font-size: 22px; }\n      .header h2 { font-size: 24px; }\n    }\n  </style>\n</head>\n\n<body>\n  <div class=\"email-container\">\n    <header class=\"header\">\n      <h2>Vision Data</h2>\n      <p class=\"tagline\">Sua satisfação, nossa prioridade.</p>\n    </header>\n\n    <main class=\"content\">\n      <h1>Ouvimos você, {{ $('Edit Fields').item.json.Nome }}.</h1>\n      \n      <p>Obrigado por reservar um momento para nos dar seu feedback. Vimos sua resposta em nossa recente pesquisa e notamos que sua experiência não foi positiva.</p>\n      \n      <p class=\"emphasis\">Lamentamos sinceramente por não termos atendido às suas expectativas.</p>\n      \n      <p>Sua opinião é fundamental para nós. Já encaminhamos seus comentários para a equipe responsável, que está analisando o que aconteceu para entendermos como podemos melhorar.</p>\n      \n      <div class=\"action-box\">\n        <p>Se você estiver disposto a compartilhar mais detalhes sobre o que aconteceu, por favor, responda diretamente a este e-mail. Nossa equipe de sucesso do cliente entrará em contato em breve.</p>\n      </div>\n      \n      <p style=\"margin-top: 25px; margin-bottom: 0;\">Nosso compromisso é corrigir isso e reconquistar sua confiança.</p>\n    </main>\n\n    <footer class=\"footer\">\n      <p>© 2025 Vision. Todos os direitos reservados</p>\n    </footer>\n  </div>\n</body>\n</html>",
+        "additionalFields": {
+          "bodyContentType": "html"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        592,
+        1584
+      ],
+      "id": "9251922b-d943-404c-a665-c7e99c61e0c8",
+      "name": "Email Feedback  para (Cliente)",
+      "webhookId": "d1cf2ded-0c4d-4d7b-a1cb-8d68a16bcf8f",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "nllewQ4rHW7ZHPhq",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "listId": "6912714e886e488e34ce9a03",
+        "name": "N8N-Agent",
+        "description": "=⚠️ **AÇÃO URGENTE: FEEDBACK DETRATOR**\n\nUm cliente deu uma nota baixa de NPS e precisamos agir rapidamente para reverter a situação e entender a causa raiz da insatisfação.\n\n---\n\n### 👤 Dados do Cliente\n\n* **Nome:** {{ $('Edit Fields').item.json.Nome }}\n* **Email:** {{ $('Edit Fields').item.json.Email }}\n\n---\n\n### 📝 Detalhes do Feedback\n\n* **Nota:** {{ $('Classificação').item.json.resposta_likert }} (Detrator)\n* **Data:** {{ $('Date & Time').item.json.formattedDate }}\n* **Comentário do Cliente (Corrigido pela IA):**\n    > {{ $('Corretor').item.json.output }}\n\n---\n\n### 🤖 Análise (Insights da IA)\n\nEsta análise deve ser usada para preparar a abordagem ao cliente:\n\n* **Sentimento Geral:** {{ $('Sentimento').item.json.output.sentimento }}\n* **Categoria:** {{ $('Categorias').item.json.output.Categoria }}\n* **Subcategoria:** {{ $('Categorias').item.json.output.Subcategoria }}\n* **Principal Motivador:** {{ $('Motivadores').item.json.output }}\n\n---\n\n### ✅ Próximos Passos (Checklist)\n\n* [ ] Entrar em contato com o cliente (e-mail ou telefone).\n* [ ] Registrar o resumo da conversa nos comentários deste card.\n* [ ] Definir um plano de ação (se aplicável).\n* [ ] Mover o card para \"Em Tratamento\" ou \"Resolvido\".\n\n**Comentário Original (Sem tratamento):**\n`{{ $('Classificação').item.json.cometario }}`",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.trello",
+      "typeVersion": 1,
+      "position": [
+        816,
+        1584
+      ],
+      "id": "bb0f1ed8-4b89-4880-9246-73592ff7100c",
+      "name": "Card Backlog Trello",
+      "credentials": {
+        "trelloApi": {
+          "id": "FP3CgiGFzjkH4N6P",
+          "name": "Trello account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toRecipients": "guilhermesoliveira20@gmail.com",
+        "subject": "=Nova Avaliação NPS -  {{ $('Classificação').item.json.classificacao }}",
+        "bodyContent": "={{ $json.ContentEmail }}",
+        "additionalFields": {
+          "bodyContentType": "html"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        592,
+        1824
+      ],
+      "id": "3ea9ba1d-eb11-4b19-8808-38c44da03a3b",
+      "name": "Email Feedback para (Departamento)",
+      "webhookId": "2a39b412-71a6-4680-b23d-50f3fa3f0339",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "nllewQ4rHW7ZHPhq",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1SVd1tRKr1OmjNJU9ypxbGXIc2691Ja1ftMEYP1VVQYo",
+          "mode": "list",
+          "cachedResultName": "n8n_agent_nps",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SVd1tRKr1OmjNJU9ypxbGXIc2691Ja1ftMEYP1VVQYo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1295433519,
+          "mode": "list",
+          "cachedResultName": "n8n-forms",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SVd1tRKr1OmjNJU9ypxbGXIc2691Ja1ftMEYP1VVQYo/edit#gid=1295433519"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "comentario": "={{ $('Classificação').item.json.cometario }}",
+            "classifcacao": "={{ $('Classificação').item.json.classificacao }}",
+            "nota": "={{ $('Classificação').item.json.resposta_likert }}",
+            "data": "={{ $('Date & Time').item.json.formattedDate }}",
+            "comentario_formatado": "={{ $('Corretor').item.json.output }}",
+            "sentimento": "={{ $('Sentimento').item.json.output.sentimento }}",
+            "categoria": "={{ $('Categorias').item.json.output.Categoria }}",
+            "subCategoria": "={{ $('Categorias').item.json.output.Subcategoria }}",
+            "motivador": "={{ $('Motivadores').item.json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "comentario",
+              "displayName": "comentario",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "nota",
+              "displayName": "nota",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "comentario_formatado",
+              "displayName": "comentario_formatado",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "classifcacao",
+              "displayName": "classifcacao",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sentimento",
+              "displayName": "sentimento",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "categoria",
+              "displayName": "categoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "subCategoria",
+              "displayName": "subCategoria",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "motivador",
+              "displayName": "motivador",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -160,
+        1872
+      ],
+      "id": "95bbeead-f880-4642-abab-151eefe94ada",
+      "name": "Registro forms",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dhx8nYzY04CnA6C0",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Converter Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Converter Dados": {
+      "main": [
+        [
+          {
+            "node": "Classificação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classificação": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Corretor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Corretor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sentimento",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Sentimento",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Categorias",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Categorias",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentimento": {
+      "main": [
+        [
+          {
+            "node": "Categorias",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Categorias": {
+      "main": [
+        [
+          {
+            "node": "Motivadores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Corretor": {
+      "main": [
+        [
+          {
+            "node": "Sentimento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Motivadores",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Motivadores": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Registro forms",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "ContentEmail (Detrator)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ContentEmail (Promotor)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "ContentEmail (Neutro)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ContentEmail (Detrator)": {
+      "main": [
+        [
+          {
+            "node": "Email Feedback para (Departamento)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Email Feedback  para (Cliente)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ContentEmail (Promotor)": {
+      "main": [
+        [
+          {
+            "node": "Email Feedback para (Departamento)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ContentEmail (Neutro)": {
+      "main": [
+        [
+          {
+            "node": "Email Feedback para (Departamento)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Feedback  para (Cliente)": {
+      "main": [
+        [
+          {
+            "node": "Card Backlog Trello",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Card Backlog Trello": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Feedback para (Departamento)": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registro forms": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "4381f03a-a1aa-4fb0-b3a6-3c786dc83dfc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4298eb8aba464aede5b834296f5ae42ce50b4e09444b58414216ab3d56f0a4cd"
+  },
+  "id": "o0Pqe24D44D39Pjh",
+  "tags": []
+}

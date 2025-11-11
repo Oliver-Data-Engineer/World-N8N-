@@ -21,11 +21,11 @@ O repositório está organizado por **regiões** (pastas) que simbolizam diferen
 
 | Região | Descrição |
 |--------|------------|
-| 🧠 [**Data Core**](Data%20Core/) | Fluxos voltados para análise, tratamento e manipulação de dados. |
-| ⚙️ [**System Ops**](System%20Ops/) | Automação de processos operacionais e integrações entre sistemas. |
-| 💬 [**Comms Zone**](Comms%20Zone/) | Workflows de comunicação — e-mails, notificações e integrações com chat. |
-| 💡 [**Experimental Area**](.Experimental%20Area/) | Protótipos, testes e ideias em desenvolvimento. |
-| 🛠️ [**Utils & Templates**](Utils%20&%20Templates/) | Componentes reutilizáveis, funções e estruturas de base para novos fluxos. |
+| 🧠 [**Data Core**] | Fluxos voltados para análise, tratamento e manipulação de dados. |
+| ⚙️ [**System Ops**] | Automação de processos operacionais e integrações entre sistemas. |
+| 💬 [**Comms Zone**] | Workflows de comunicação — e-mails, notificações e integrações com chat. |
+| 💡 [**Experimental Area**] | Protótipos, testes e ideias em desenvolvimento. |
+| 🛠️ [**Utils & Templates**] | Componentes reutilizáveis, funções e estruturas de base para novos fluxos. |
 
 ### 🧭 Painel de Navegação
 

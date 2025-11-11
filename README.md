@@ -16,13 +16,16 @@ Aqui, cada fluxo representa um **mundo interligado** dentro desse ecossistema, c
 
 O repositório está organizado por **regiões** (pastas) que simbolizam diferentes áreas de automação:
 
+## 🗺️ Estrutura do Mapa
+
+
 | Região | Descrição |
 |--------|------------|
-| 🧠 **Data Core** | Fluxos voltados para análise, tratamento e manipulação de dados. |
-| ⚙️ **System Ops** | Automação de processos operacionais e integrações entre sistemas. |
-| 💬 **Comms Zone** | Workflows de comunicação — e-mails, notificações e integrações com chat. |
-| 💡 **Experimental Area** | Protótipos, testes e ideias em desenvolvimento. |
-| 🛠️ **Utils & Templates** | Componentes reutilizáveis, funções e estruturas de base para novos fluxos. |
+| 🧠 [**Data Core**](./Data Core/) | Fluxos voltados para análise, tratamento e manipulação de dados. |
+| ⚙️ [**System Ops**](./System Ops/) | Automação de processos operacionais e integrações entre sistemas. |
+| 💬 [**Comms Zone**](./Comms Zone/) | Workflows de comunicação — e-mails, notificações e integrações com chat. |
+| 💡 [**Experimental Area**](./Experimental Area/) | Protótipos, testes e ideias em desenvolvimento. |
+| 🛠️ [**Utils & Templates**](./Utils & Templates/) | Componentes reutilizáveis, funções e estruturas de base para novos fluxos. |
 
 ---
 

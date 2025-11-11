@@ -16,8 +16,6 @@ Aqui, cada fluxo representa um **mundo interligado** dentro desse ecossistema, c
 
 O repositório está organizado por **regiões** (pastas) que simbolizam diferentes áreas de automação:
 
-## 🗺️ Estrutura do Mapa
-
 
 | Região | Descrição |
 |--------|------------|

@@ -1,3 +1,6 @@
+
+<img width="1280" height="800" alt="Gemini_Generated_Image_3ou2xc3ou2xc3ou2" src="https://github.com/user-attachments/assets/66234ca0-f4b2-4dc2-960f-2967b5d836ab" />
+
 # 🌍 World [ N8N ]
 
 > **Explore. Conecte. Automatize.**  

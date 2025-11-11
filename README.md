@@ -27,17 +27,15 @@ O repositório está organizado por **regiões** (pastas) que simbolizam diferen
 | 💡 [**Experimental Area**](.Experimental%20Area/) | Protótipos, testes e ideias em desenvolvimento. |
 | 🛠️ [**Utils & Templates**](Utils%20&%20Templates/) | Componentes reutilizáveis, funções e estruturas de base para novos fluxos. |
 
----
-
 ### 🧭 Painel de Navegação
 
 Acesso direto a cada região do World:
 
-- 🧠 [**Data Core**](Data%20Core/) — *Análise, tratamento e manipulação de dados.*  
-- ⚙️ [**System Ops**](System%20Ops/) — *Automação de processos operacionais e integrações.*  
-- 💬 [**Comms Zone**](Comms%20Zone/) — *Workflows de comunicação, e-mails e notificações.*  
-- 💡 [**Experimental Area**](Experimental%20Area/) — *Protótipos, testes e ideias em desenvolvimento.*  
-- 🛠️ [**Utils & Templates**](Utils%20&%20Templates/) — *Componentes reutilizáveis e estruturas de base.*
+- 🧠 [**Data Core**](./Data-Core) — *Análise, tratamento e manipulação de dados.*  
+- ⚙️ [**System Ops**](./System-Ops) — *Automação de processos operacionais e integrações.*  
+- 💬 [**Comms Zone**](./Comms-Zone) — *Workflows de comunicação, e-mails e notificações.*  
+- 💡 [**Experimental Area**](./Experimental-Area) — *Protótipos, testes e ideias em desenvolvimento.*  
+- 🛠️ [**Utils & Templates**](./Utils-Templates) — *Componentes reutilizáveis e estruturas de base.*
 
 ---
 

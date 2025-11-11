@@ -1,0 +1,44 @@
+# 🌍 World [ N8N ]
+
+> **Explore. Conecte. Automatize.**  
+> Bem-vindo ao **World [ N8N ]**, o universo onde cada fluxo é um novo mapa e cada automação é uma missão concluída.
+
+---
+
+## 🕹️ Sobre o Projeto
+
+**World [ N8N ]** é um repositório que reúne todas as minhas automações desenvolvidas com o [**N8N**](https://n8n.io/) — uma poderosa ferramenta de *workflow automation* de código aberto.  
+Aqui, cada fluxo representa um **mundo interligado** dentro desse ecossistema, criado para simplificar rotinas, integrar sistemas e transformar dados em ação.
+
+---
+
+## 🗺️ Estrutura do Mapa
+
+O repositório está organizado por **regiões** (pastas) que simbolizam diferentes áreas de automação:
+
+| Região | Descrição |
+|--------|------------|
+| 🧠 **Data Core** | Fluxos voltados para análise, tratamento e manipulação de dados. |
+| ⚙️ **System Ops** | Automação de processos operacionais e integrações entre sistemas. |
+| 💬 **Comms Zone** | Workflows de comunicação — e-mails, notificações e integrações com chat. |
+| 💡 **Experimental Area** | Protótipos, testes e ideias em desenvolvimento. |
+| 🛠️ **Utils & Templates** | Componentes reutilizáveis, funções e estruturas de base para novos fluxos. |
+
+---
+
+---
+
+## 🧑‍💻 Autor
+
+**Guilherme Oliveira**  
+*Engenheiro de Software & Analista de Dados*  
+💡 Criando soluções que conectam pessoas, dados e automações.  
+
+[LinkedIn]([https://www.linkedin.com/in/guilhermeoliveira](https://www.linkedin.com/in/data-science-guilherme-oliveira/))
+
+---
+
+## 🏁 Missão Final
+
+**Conecte. Automatize. Evolua.**  
+Cada fluxo é uma **missão cumprida rumo a um mundo mais inteligente**.
